@@ -85,6 +85,26 @@
   const VORTICITY = 26.0;
   const FORCE = 700.0;
   const RADIUS = 0.06;
+  
+  // Opacity control (0.0 - 1.0)
+  // Can be set via: <html data-liquid-opacity="0.5">
+  // Or CSS var: :root { --liquid-opacity: 0.5; }
+  function getOpacity() {
+    const html = document.documentElement;
+    const attr = html.getAttribute("data-liquid-opacity");
+    if (attr) {
+      const val = parseFloat(attr);
+      if (!isNaN(val)) return clamp(val, 0, 1);
+    }
+    const cssVar = getComputedStyle(html).getPropertyValue("--liquid-opacity");
+    if (cssVar) {
+      const val = parseFloat(cssVar.trim());
+      if (!isNaN(val)) return clamp(val, 0, 1);
+    }
+    return 0.6; // Default: subtle effect
+  }
+  
+  let OPACITY = getOpacity();
 
   function shader(type, src) {
     const s = gl.createShader(type);
@@ -480,7 +500,7 @@
     gl.useProgram(pDisplay);
     gl.bindVertexArray(VAO);
     bindTex(pDisplay, "uDye", dye.read.tex, 0);
-    gl.uniform1f(gl.getUniformLocation(pDisplay, "uOpacity"), 1.0);
+    gl.uniform1f(gl.getUniformLocation(pDisplay, "uOpacity"), OPACITY);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
     gl.bindVertexArray(null);
 
