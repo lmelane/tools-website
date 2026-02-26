@@ -392,9 +392,9 @@
     // Combine dye + bloom in RGB
     vec3 final = c.rgb + bloom.rgb * uBloomIntensity;
     
-    // Brightness-based alpha (independent of dye.a)
+    // FORCE constant alpha for visibility
     float brightness = dot(final, vec3(0.299, 0.587, 0.114));
-    float alpha = smoothstep(0.001, 0.15, brightness) * uOpacity;
+    float alpha = smoothstep(0.0001, 0.05, brightness) * 0.85;
     
     outColor = vec4(final, alpha);
   }`;
