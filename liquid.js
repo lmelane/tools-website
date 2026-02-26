@@ -116,8 +116,8 @@
   // Pressure iterations (more = smoother incompressibility, more cost)
   let PRESSURE_ITER = 16;
 
-  const VELOCITY_DISS = 0.985;
-  const DYE_DISS = 0.998; // Higher = less dissipation = more visible
+  const VELOCITY_DISS = 0.99;  // Less dissipation = smoother trails
+  const DYE_DISS = 0.995; // Reduced from 0.998 for better fade
 
   const VORTICITY = 26.0;
   const FORCE = 700.0;
@@ -126,9 +126,9 @@
   const FPS_CAP = 55;
 
   // Bloom settings
-  const BLOOM_THRESHOLD = 0.4; // brightness threshold (0-1)
-  const BLOOM_INTENSITY = 0.35; // bloom strength (0-1)
-  const BLOOM_ITERATIONS = 2; // blur passes (more = softer)
+  const BLOOM_THRESHOLD = 0.25; // Lower = more bloom
+  const BLOOM_INTENSITY = 0.5; // Stronger glow
+  const BLOOM_ITERATIONS = 3; // More blur = softer
 
   // Pause when not visible
   let isVisible = true;
@@ -604,7 +604,7 @@
 
     // Inject on mouse movement (velocity threshold) OR mousedown OR scroll
     const pointerVelocity = Math.sqrt(vx * vx + vy * vy);
-    const injecting = pointerVelocity > 0.5 || pointer.down || Math.abs(sv) > 0.0004;
+    const injecting = pointerVelocity > 2.0 || pointer.down || Math.abs(sv) > 0.0004;
 
     if (injecting) {
       if (Math.random() < 0.01) { // Log 1% of injections to avoid spam
@@ -672,14 +672,14 @@
     });
     velocity.swap();
 
-    // 7) Advect dye (minimal return to base for visibility)
+    // 7) Advect dye (smooth fade)
     drawTo(dye.write.fbo, pAdvect, (p) => {
       bindTex(p, "uVelocity", velocity.read.tex, 0);
       bindTex(p, "uSource", dye.read.tex, 1);
       gl.uniform1f(gl.getUniformLocation(p, "uDt"), dt * 60.0);
       gl.uniform1f(gl.getUniformLocation(p, "uDissipation"), DYE_DISS);
       gl.uniform3f(gl.getUniformLocation(p, "uBase"), BASE.r, BASE.g, BASE.b);
-      gl.uniform1f(gl.getUniformLocation(p, "uToBase"), 0.3); // Reduced from 1.0 for better visibility
+      gl.uniform1f(gl.getUniformLocation(p, "uToBase"), 0.15); // Minimal return to base for smooth trails
     });
     dye.swap();
 
