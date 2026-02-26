@@ -167,15 +167,23 @@
     console.log('[tabs-slider] Tabs mapping:', Array.from(tabsMap.keys()));
     console.log('[tabs-slider] Sliders mapping:', Array.from(slidersMap.keys()));
 
-    // Hide all sliders initially
+    // Hide all sliders initially and set min-height to prevent collapse
     sliders.forEach(slider => {
-      gsap.set(slider, { display: 'none', opacity: 0 });
+      gsap.set(slider, { 
+        display: 'none', 
+        opacity: 0,
+        minHeight: '400px' // Prevent collapse when children have height: 100%
+      });
     });
 
     // Show first slider (slider-1) by default
     const firstSlider = slidersMap.get('1');
     if (firstSlider) {
-      gsap.set(firstSlider, { display: 'block', opacity: 1 });
+      gsap.set(firstSlider, { 
+        display: 'block', 
+        opacity: 1,
+        minHeight: '400px'
+      });
       console.log('[tabs-slider] Default slider-1 shown');
     }
 
@@ -245,7 +253,7 @@
 
     // Show target slider with animation
     hideTimeline.add(() => {
-      gsap.set(targetSlider, { display: 'block' });
+      gsap.set(targetSlider, { display: 'block', minHeight: '400px' });
       
       // Get animation variant from data attribute or use default
       const animationName = targetSlider.getAttribute('data-animation') || DEFAULT_ANIMATION;
