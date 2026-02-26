@@ -111,7 +111,7 @@
   let PRESSURE_ITER = 16;
 
   const VELOCITY_DISS = 0.985;
-  const DYE_DISS = 0.992;
+  const DYE_DISS = 0.998; // Higher = less dissipation = more visible
 
   const VORTICITY = 26.0;
   const FORCE = 700.0;
@@ -659,14 +659,14 @@
     });
     velocity.swap();
 
-    // 7) Advect dye (toward base)
+    // 7) Advect dye (minimal return to base for visibility)
     drawTo(dye.write.fbo, pAdvect, (p) => {
       bindTex(p, "uVelocity", velocity.read.tex, 0);
       bindTex(p, "uSource", dye.read.tex, 1);
       gl.uniform1f(gl.getUniformLocation(p, "uDt"), dt * 60.0);
       gl.uniform1f(gl.getUniformLocation(p, "uDissipation"), DYE_DISS);
       gl.uniform3f(gl.getUniformLocation(p, "uBase"), BASE.r, BASE.g, BASE.b);
-      gl.uniform1f(gl.getUniformLocation(p, "uToBase"), 1.0);
+      gl.uniform1f(gl.getUniformLocation(p, "uToBase"), 0.3); // Reduced from 1.0 for better visibility
     });
     dye.swap();
 
