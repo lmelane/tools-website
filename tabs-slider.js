@@ -167,8 +167,12 @@
     console.log('[tabs-slider] Tabs mapping:', Array.from(tabsMap.keys()));
     console.log('[tabs-slider] Sliders mapping:', Array.from(slidersMap.keys()));
 
-    // Hide all sliders initially and set min-height to prevent collapse
+    // Clear Webflow inline styles first, then hide all sliders
     sliders.forEach(slider => {
+      // Remove Webflow inline styles
+      slider.style.removeProperty('display');
+      slider.style.removeProperty('opacity');
+      
       gsap.set(slider, { 
         display: 'none', 
         opacity: 0,
@@ -179,6 +183,10 @@
     // Show first slider (slider-1) by default
     const firstSlider = slidersMap.get('1');
     if (firstSlider) {
+      // Remove Webflow inline styles
+      firstSlider.style.removeProperty('display');
+      firstSlider.style.removeProperty('opacity');
+      
       gsap.set(firstSlider, { 
         display: 'block', 
         opacity: 1,
@@ -253,6 +261,10 @@
 
     // Show target slider with animation
     hideTimeline.add(() => {
+      // Remove Webflow inline styles
+      targetSlider.style.removeProperty('display');
+      targetSlider.style.removeProperty('opacity');
+      
       gsap.set(targetSlider, { display: 'block', minHeight: '400px' });
       
       // Get animation variant from data attribute or use default
