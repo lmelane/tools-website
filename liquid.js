@@ -398,9 +398,12 @@
     // Combine dye + bloom in RGB
     vec3 final = c.rgb + bloom.rgb * uBloomIntensity;
     
-    // FORCE constant alpha for visibility
+    // Alpha based on brightness - only where there's fluid
     float brightness = dot(final, vec3(0.299, 0.587, 0.114));
-    float alpha = smoothstep(0.0001, 0.05, brightness) * 0.85;
+    float alpha = smoothstep(0.001, 0.08, brightness) * 0.9;
+    
+    // If no brightness, fully transparent
+    if (brightness < 0.001) alpha = 0.0;
     
     outColor = vec4(final, alpha);
   }`;
