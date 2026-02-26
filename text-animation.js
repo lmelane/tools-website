@@ -14,55 +14,60 @@
 
   console.log('[text-animation] Initializing...');
 
-  // Split text into letters while preserving spaces and line breaks
+  // Split text into letters while preserving HTML structure (spans, br, etc.)
   function splitTextToLetters(element) {
-    const originalHTML = element.innerHTML;
-    const text = element.textContent;
-    
-    // Store original styles
-    const computedStyle = getComputedStyle(element);
-    const lineHeight = computedStyle.lineHeight;
-    const letterSpacing = computedStyle.letterSpacing;
-    const wordSpacing = computedStyle.wordSpacing;
-    
-    // Clear element
-    element.innerHTML = '';
-    element.style.lineHeight = lineHeight;
-    element.style.letterSpacing = letterSpacing;
-    element.style.wordSpacing = wordSpacing;
-    
     const letters = [];
-    const words = text.split(' ');
     
-    words.forEach((word, wordIndex) => {
-      const wordSpan = document.createElement('span');
-      wordSpan.style.display = 'inline-block';
-      wordSpan.style.whiteSpace = 'nowrap';
-      
-      // Split word into letters
-      [...word].forEach((char, charIndex) => {
-        const letterSpan = document.createElement('span');
-        letterSpan.textContent = char;
-        letterSpan.style.display = 'inline-block';
-        letterSpan.style.opacity = '0';
-        letterSpan.style.transform = 'translateY(20px) rotateX(-90deg)';
-        letterSpan.style.transformOrigin = 'center bottom';
-        letterSpan.className = 'letter-animated';
+    // Recursive function to process nodes
+    function processNode(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        // Text node - split into letters
+        const text = node.textContent;
+        if (text.trim() === '') {
+          // Keep whitespace as-is
+          return;
+        }
         
-        wordSpan.appendChild(letterSpan);
-        letters.push(letterSpan);
-      });
-      
-      element.appendChild(wordSpan);
-      
-      // Add space between words (except last word)
-      if (wordIndex < words.length - 1) {
-        const space = document.createElement('span');
-        space.innerHTML = '&nbsp;';
-        space.style.display = 'inline-block';
-        element.appendChild(space);
+        const fragment = document.createDocumentFragment();
+        
+        [...text].forEach((char) => {
+          if (char === ' ') {
+            // Preserve space
+            const space = document.createTextNode(' ');
+            fragment.appendChild(space);
+          } else if (char.trim() !== '') {
+            // Create letter span
+            const letterSpan = document.createElement('span');
+            letterSpan.textContent = char;
+            letterSpan.style.display = 'inline-block';
+            letterSpan.style.opacity = '0';
+            letterSpan.style.transform = 'translateY(20px) rotateX(-90deg)';
+            letterSpan.style.transformOrigin = 'center bottom';
+            letterSpan.className = 'letter-animated';
+            
+            fragment.appendChild(letterSpan);
+            letters.push(letterSpan);
+          }
+        });
+        
+        // Replace text node with fragment
+        node.parentNode.replaceChild(fragment, node);
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        // Element node (span, br, etc.) - preserve and process children
+        if (node.tagName === 'BR') {
+          // Keep BR as-is
+          return;
+        }
+        
+        // Process children
+        const childNodes = Array.from(node.childNodes);
+        childNodes.forEach(child => processNode(child));
       }
-    });
+    }
+    
+    // Clone to avoid modifying during iteration
+    const childNodes = Array.from(element.childNodes);
+    childNodes.forEach(child => processNode(child));
     
     return letters;
   }
