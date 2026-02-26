@@ -388,9 +388,16 @@
   void main(){
     vec4 c = texture(uDye, vUv);
     vec4 bloom = texture(uBloom, vUv);
-    float a = smoothstep(0.02, 0.9, c.a) * uOpacity;
+    
+    // Combine dye + bloom in RGB
     vec3 final = c.rgb + bloom.rgb * uBloomIntensity;
-    outColor = vec4(final, a);
+    
+    // Use max of dye alpha and bloom brightness for visibility
+    float dyeAlpha = smoothstep(0.02, 0.9, c.a);
+    float bloomBrightness = dot(bloom.rgb, vec3(0.333));
+    float finalAlpha = max(dyeAlpha, bloomBrightness * uBloomIntensity) * uOpacity;
+    
+    outColor = vec4(final, finalAlpha);
   }`;
 
   const pAdvect = program(VS, FS_ADVECT);
@@ -415,6 +422,7 @@
   const NEAREST = gl.NEAREST;
 
   let velocity, dye, pressure, divergence, curlTex, bloomFBO, bloomTemp;
+  let bloomW, bloomH, bloomTexel;
 
   function alloc() {
     simW = Math.max(2, Math.floor(innerWidth * DPR * SIM_SCALE));
@@ -434,9 +442,10 @@
     curlTex = { tex: tex(simW, simH, INTERNAL, FORMAT, TYPE, NEAREST), fbo: null };
     curlTex.fbo = fbo(curlTex.tex);
 
-    // Bloom buffers (downscaled 4x for performance)
-    const bloomW = Math.max(2, Math.floor(canvas.width / 4));
-    const bloomH = Math.max(2, Math.floor(canvas.height / 4));
+    // Bloom buffers (downscaled from sim resolution, NOT canvas)
+    bloomW = Math.max(2, Math.floor(simW / 2));
+    bloomH = Math.max(2, Math.floor(simH / 2));
+    bloomTexel = [1 / bloomW, 1 / bloomH];
     bloomFBO = doubleFBO(bloomW, bloomH, INTERNAL, FORMAT, TYPE, LINEAR);
     bloomTemp = { tex: tex(bloomW, bloomH, INTERNAL, FORMAT, TYPE, LINEAR), fbo: null };
     bloomTemp.fbo = fbo(bloomTemp.tex);
@@ -663,10 +672,6 @@
     dye.swap();
 
     // 8) Bloom pass
-    const bloomW = Math.max(2, Math.floor(canvas.width / 4));
-    const bloomH = Math.max(2, Math.floor(canvas.height / 4));
-    const bloomTexel = [1 / bloomW, 1 / bloomH];
-
     // 8a) Extract bright areas (threshold)
     gl.useProgram(pBloomThreshold);
     gl.bindVertexArray(VAO);
