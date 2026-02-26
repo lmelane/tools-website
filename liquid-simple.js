@@ -84,7 +84,7 @@
   const DYE_DISS = 0.994; // Less dissipation = more visible
   const VORTICITY = 30.0; // More swirl = more organic
   const FORCE = 500.0; // Lower = more delicate movement
-  const RADIUS = 0.035; // Smaller = finer, more precise trails
+  const RADIUS = 0.018; // Ultra-small = very fine, precise trails
   
   // Opacity control (0.0 - 1.0)
   // Can be set via: <html data-liquid-opacity="0.5">
