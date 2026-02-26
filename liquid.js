@@ -345,7 +345,7 @@
       outColor = vec4(v,0,1);
     } else {
       vec3 rgb = cur.rgb + uColor * influence;
-      float a = clamp(cur.a + influence, 0.0, 1.0);
+      float a = clamp(cur.a + influence * 3.0, 0.0, 1.0);
       outColor = vec4(rgb, a);
     }
   }`;
@@ -392,12 +392,11 @@
     // Combine dye + bloom in RGB
     vec3 final = c.rgb + bloom.rgb * uBloomIntensity;
     
-    // Use max of dye alpha and bloom brightness for visibility
-    float dyeAlpha = smoothstep(0.02, 0.9, c.a);
-    float bloomBrightness = dot(bloom.rgb, vec3(0.333));
-    float finalAlpha = max(dyeAlpha, bloomBrightness * uBloomIntensity) * uOpacity;
+    // Brightness-based alpha (independent of dye.a)
+    float brightness = dot(final, vec3(0.299, 0.587, 0.114));
+    float alpha = smoothstep(0.001, 0.15, brightness) * uOpacity;
     
-    outColor = vec4(final, finalAlpha);
+    outColor = vec4(final, alpha);
   }`;
 
   const pAdvect = program(VS, FS_ADVECT);
