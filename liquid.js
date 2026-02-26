@@ -19,8 +19,12 @@
 
   // ---------- Canvas ----------
   const canvas = document.getElementById("liquid-canvas-global");
-  if (!canvas) return;
+  if (!canvas) {
+    console.warn("[liquid] Canvas #liquid-canvas-global not found");
+    return;
+  }
 
+  console.log("[liquid] Canvas found");
   // show canvas (CSS may default display:none)
   canvas.style.display = "block";
 
@@ -37,6 +41,8 @@
     console.warn("[liquid] WebGL2 not available");
     return;
   }
+
+  console.log("[liquid] WebGL2 context created");
 
   gl.getExtension("EXT_color_buffer_float");
   gl.getExtension("OES_texture_float_linear");
@@ -496,6 +502,8 @@
 
   alloc();
 
+  console.log("[liquid] Initialized - Canvas:", canvas.width, "x", canvas.height, "Sim:", simW, "x", simH);
+
   // -------------------- Inputs (mouse + scroll) --------------------
   const pointer = { x: 0.5, y: 0.5, px: 0.5, py: 0.5, down: false };
 
@@ -599,6 +607,9 @@
     const injecting = pointerVelocity > 0.5 || pointer.down || Math.abs(sv) > 0.0004;
 
     if (injecting) {
+      if (Math.random() < 0.01) { // Log 1% of injections to avoid spam
+        console.log("[liquid] Injecting at", pointer.x.toFixed(2), pointer.y.toFixed(2), "velocity:", pointerVelocity.toFixed(2));
+      }
       splatVelocity(vx, vy - sv);
 
       // Rich color cycling (deep/mid/hi mix) without drifting to black
@@ -725,5 +736,6 @@
     requestAnimationFrame(frame);
   }
 
+  console.log("[liquid] Starting render loop");
   requestAnimationFrame(frame);
 })();
