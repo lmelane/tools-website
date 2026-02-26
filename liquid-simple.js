@@ -301,24 +301,55 @@
   out vec4 outColor;
   uniform sampler2D uDye;
   uniform float uOpacity;
+  uniform vec2 uTexel;
+  
+  // Soft glow sampling for depth
+  vec4 sampleGlow(sampler2D tex, vec2 uv, float radius) {
+    vec4 sum = vec4(0.0);
+    float total = 0.0;
+    
+    // 9-tap soft blur for glow
+    for(float x = -1.0; x <= 1.0; x += 1.0) {
+      for(float y = -1.0; y <= 1.0; y += 1.0) {
+        vec2 offset = vec2(x, y) * uTexel * radius;
+        float weight = 1.0 - length(vec2(x, y)) * 0.3;
+        sum += texture(tex, uv + offset) * weight;
+        total += weight;
+      }
+    }
+    return sum / total;
+  }
+  
   void main(){
     vec4 c = texture(uDye, vUv);
     
+    // Soft glow layer for depth
+    vec4 glow = sampleGlow(uDye, vUv, 2.5);
+    
     // Gradient opacity based on color intensity
     float brightness = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+    float glowBrightness = dot(glow.rgb, vec3(0.299, 0.587, 0.114));
     
     // Edge fade for smoother transitions
     vec2 edgeDist = min(vUv, 1.0 - vUv);
     float edgeFade = smoothstep(0.0, 0.15, min(edgeDist.x, edgeDist.y));
     
-    // Multi-level alpha for sophisticated depth
+    // Multi-level alpha with glow integration
     float baseAlpha = smoothstep(0.01, 0.85, c.a);
-    float brightnessBoost = smoothstep(0.1, 0.6, brightness) * 0.3;
+    float glowAlpha = smoothstep(0.05, 0.4, glow.a) * 0.4;
+    float brightnessBoost = smoothstep(0.1, 0.6, brightness) * 0.25;
     
-    float finalAlpha = (baseAlpha + brightnessBoost) * uOpacity * edgeFade;
+    // Combine sharp detail + soft glow for depth
+    vec3 finalColor = mix(glow.rgb * 1.2, c.rgb, 0.7);
+    
+    // Color depth enhancement (darker = more depth)
+    float depthFactor = 1.0 - brightness * 0.15;
+    finalColor *= depthFactor;
+    
+    float finalAlpha = (baseAlpha + glowAlpha + brightnessBoost) * uOpacity * edgeFade;
     finalAlpha = clamp(finalAlpha, 0.0, 1.0);
     
-    outColor = vec4(c.rgb, finalAlpha);
+    outColor = vec4(finalColor, finalAlpha);
   }`;
 
   const pAdvect = program(VS, FS_ADVECT);
@@ -534,6 +565,7 @@
     gl.bindVertexArray(VAO);
     bindTex(pDisplay, "uDye", dye.read.tex, 0);
     gl.uniform1f(gl.getUniformLocation(pDisplay, "uOpacity"), OPACITY);
+    gl.uniform2f(gl.getUniformLocation(pDisplay, "uTexel"), 1.0 / canvas.width, 1.0 / canvas.height);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
     gl.bindVertexArray(null);
 
