@@ -277,14 +277,21 @@
   uniform vec2 uPoint;
   uniform float uRadius;
   uniform vec3 uColor;
+  uniform float uIntensity; // Variable intensity for complexity
   void main(){
     vec4 cur = texture(uTarget, vUv);
     vec2 p = vUv - uPoint;
     p.x *= uTexel.y / uTexel.x;
     float d = dot(p,p);
-    float influence = exp(-d / max(1e-6, uRadius*uRadius));
+    
+    // Sophisticated falloff with variable intensity
+    float influence = exp(-d / max(1e-6, uRadius*uRadius)) * uIntensity;
+    
+    // Gradient-based blending for smoother integration
+    float blendFactor = smoothstep(0.0, 1.0, influence);
+    
     vec3 rgb = cur.rgb + uColor * influence;
-    float a = clamp(cur.a + influence, 0.0, 1.0);
+    float a = clamp(cur.a + influence * 0.8, 0.0, 1.0);
     outColor = vec4(rgb, a);
   }`;
 
@@ -296,8 +303,22 @@
   uniform float uOpacity;
   void main(){
     vec4 c = texture(uDye, vUv);
-    float a = smoothstep(0.02, 0.9, c.a) * uOpacity;
-    outColor = vec4(c.rgb, a);
+    
+    // Gradient opacity based on color intensity
+    float brightness = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+    
+    // Edge fade for smoother transitions
+    vec2 edgeDist = min(vUv, 1.0 - vUv);
+    float edgeFade = smoothstep(0.0, 0.15, min(edgeDist.x, edgeDist.y));
+    
+    // Multi-level alpha for sophisticated depth
+    float baseAlpha = smoothstep(0.01, 0.85, c.a);
+    float brightnessBoost = smoothstep(0.1, 0.6, brightness) * 0.3;
+    
+    float finalAlpha = (baseAlpha + brightnessBoost) * uOpacity * edgeFade;
+    finalAlpha = clamp(finalAlpha, 0.0, 1.0);
+    
+    outColor = vec4(c.rgb, finalAlpha);
   }`;
 
   const pAdvect = program(VS, FS_ADVECT);
@@ -359,22 +380,24 @@
     gl.uniform1i(gl.getUniformLocation(prog, name), unit);
   }
 
-  function splatVelocity(fx, fy) {
+  function splatVelocity(fx, fy, intensity = 1.0) {
     drawTo(velocity.write.fbo, pSplat, (p) => {
       bindTex(p, "uTarget", velocity.read.tex, 0);
       gl.uniform2f(gl.getUniformLocation(p, "uPoint"), pointer.x, pointer.y);
       gl.uniform1f(gl.getUniformLocation(p, "uRadius"), RADIUS);
       gl.uniform3f(gl.getUniformLocation(p, "uColor"), fx, fy, 0);
+      gl.uniform1f(gl.getUniformLocation(p, "uIntensity"), intensity);
     });
     velocity.swap();
   }
 
-  function splatDye(col) {
+  function splatDye(col, intensity = 1.0, radiusMultiplier = 1.0) {
     drawTo(dye.write.fbo, pSplat, (p) => {
       bindTex(p, "uTarget", dye.read.tex, 0);
       gl.uniform2f(gl.getUniformLocation(p, "uPoint"), pointer.x, pointer.y);
-      gl.uniform1f(gl.getUniformLocation(p, "uRadius"), RADIUS);
+      gl.uniform1f(gl.getUniformLocation(p, "uRadius"), RADIUS * radiusMultiplier);
       gl.uniform3f(gl.getUniformLocation(p, "uColor"), col[0], col[1], col[2]);
+      gl.uniform1f(gl.getUniformLocation(p, "uIntensity"), intensity);
     });
     dye.swap();
   }
@@ -428,19 +451,29 @@
     const injecting = pointer.down || Math.abs(sv) > 0.0005;
 
     if (injecting) {
-      splatVelocity(vx, vy - sv);
+      // Velocity-based intensity for sophisticated variation
+      const velocityMag = Math.sqrt(vx * vx + vy * vy);
+      const velocityIntensity = clamp(velocityMag / 50.0, 0.3, 1.0);
+      
+      splatVelocity(vx, vy - sv, velocityIntensity);
 
       const t = now * 0.001;
       const a = 0.5 + 0.5 * Math.sin(t * 1.2);
       const b = 0.5 + 0.5 * Math.sin(t * 0.9 + 2.0);
       const c = 0.5 + 0.5 * Math.sin(t * 0.7 + 4.0);
 
+      // Multi-layered color for depth
       const col = [
         clamp(PAL.deep.r * (0.55 + 0.45 * a) + PAL.hi.r * (0.10 * b) + PAL.mid.r * (0.08 * c)),
         clamp(PAL.mid.g * (0.55 + 0.45 * b) + PAL.hi.g * (0.10 * c) + PAL.deep.g * (0.06 * a)),
         clamp(PAL.mid.b * (0.55 + 0.45 * c) + PAL.hi.b * (0.10 * a) + PAL.deep.b * (0.06 * b))
       ];
-      splatDye(col);
+      
+      // Variable radius for organic complexity
+      const radiusVar = 0.8 + 0.4 * Math.sin(t * 2.3);
+      const intensityVar = 0.7 + 0.3 * velocityIntensity;
+      
+      splatDye(col, intensityVar, radiusVar);
     }
 
     drawTo(velocity.write.fbo, pAdvect, (p) => {
