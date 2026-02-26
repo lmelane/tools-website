@@ -62,12 +62,29 @@
         // For spans with critical styles (background-clip, etc.), wrap letters inside
         if (node.tagName === 'SPAN') {
           const computedStyle = getComputedStyle(node);
+          
+          // Check for background-clip: text (Webflow or custom)
           const hasBackgroundClip = computedStyle.webkitBackgroundClip === 'text' || 
                                     computedStyle.backgroundClip === 'text';
           
-          if (hasBackgroundClip) {
-            // Preserve the span wrapper, split text inside
+          // Check for background-image (gradient or image)
+          const hasBackgroundImage = computedStyle.backgroundImage && 
+                                     computedStyle.backgroundImage !== 'none';
+          
+          // Check for transparent text fill (Webflow gradient text)
+          const hasTransparentFill = computedStyle.webkitTextFillColor === 'rgba(0, 0, 0, 0)' ||
+                                     computedStyle.webkitTextFillColor === 'transparent';
+          
+          // If any of these conditions, preserve the span structure
+          if (hasBackgroundClip || (hasBackgroundImage && hasTransparentFill)) {
+            // Force inline-block to preserve background-clip behavior
             node.style.display = 'inline-block';
+            
+            // Ensure background-clip is applied if not already
+            if (!hasBackgroundClip && hasBackgroundImage) {
+              node.style.webkitBackgroundClip = 'text';
+              node.style.backgroundClip = 'text';
+            }
           }
         }
         
