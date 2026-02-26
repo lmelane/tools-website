@@ -59,6 +59,18 @@
           return;
         }
         
+        // For spans with critical styles (background-clip, etc.), wrap letters inside
+        if (node.tagName === 'SPAN') {
+          const computedStyle = getComputedStyle(node);
+          const hasBackgroundClip = computedStyle.webkitBackgroundClip === 'text' || 
+                                    computedStyle.backgroundClip === 'text';
+          
+          if (hasBackgroundClip) {
+            // Preserve the span wrapper, split text inside
+            node.style.display = 'inline-block';
+          }
+        }
+        
         // Process children
         const childNodes = Array.from(node.childNodes);
         childNodes.forEach(child => processNode(child));
