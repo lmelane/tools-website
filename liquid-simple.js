@@ -78,13 +78,13 @@
   };
 
   const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
-  let SIM_SCALE = 0.55;
-  let PRESSURE_ITER = 16;
-  const VELOCITY_DISS = 0.985;
-  const DYE_DISS = 0.992;
-  const VORTICITY = 26.0;
-  const FORCE = 700.0;
-  const RADIUS = 0.06;
+  let SIM_SCALE = 0.65; // Higher = more detail, finer trails
+  let PRESSURE_ITER = 20; // More iterations = smoother flow
+  const VELOCITY_DISS = 0.988; // Less dissipation = longer trails
+  const DYE_DISS = 0.994; // Less dissipation = more visible
+  const VORTICITY = 30.0; // More swirl = more organic
+  const FORCE = 500.0; // Lower = more delicate movement
+  const RADIUS = 0.035; // Smaller = finer, more precise trails
   
   // Opacity control (0.0 - 1.0)
   // Can be set via: <html data-liquid-opacity="0.5">
@@ -101,7 +101,7 @@
       const val = parseFloat(cssVar.trim());
       if (!isNaN(val)) return clamp(val, 0, 1);
     }
-    return 0.6; // Default: subtle effect
+    return 0.5; // Default: subtle, refined effect
   }
   
   let OPACITY = getOpacity();
