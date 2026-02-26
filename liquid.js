@@ -594,7 +594,9 @@
     const vx = (pointer.x - pointer.px) * FORCE;
     const vy = (pointer.y - pointer.py) * FORCE;
 
-    const injecting = pointer.down || Math.abs(sv) > 0.0004;
+    // Inject on mouse movement (velocity threshold) OR mousedown OR scroll
+    const pointerVelocity = Math.sqrt(vx * vx + vy * vy);
+    const injecting = pointerVelocity > 0.5 || pointer.down || Math.abs(sv) > 0.0004;
 
     if (injecting) {
       splatVelocity(vx, vy - sv);
