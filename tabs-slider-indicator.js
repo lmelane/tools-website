@@ -59,11 +59,12 @@
         top: ${paddingTop}px;
         left: 0;
         height: calc(100% - ${paddingTop + paddingBottom}px);
-        background-color: #161616;
+        background-color: #2B2B2B;
+        opacity: 0.5;
         transition: none;
         pointer-events: none;
         z-index: 1;
-        border-radius: inherit;
+        border-radius: 20px;
       `;
 
       // Make sure parent is positioned
