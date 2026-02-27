@@ -42,7 +42,15 @@
 
     const svgNS = "http://www.w3.org/2000/svg";
 
-    const radius = 240; // stable distance
+    // Responsive radius - smaller on mobile
+    function getRadius() {
+      const width = window.innerWidth;
+      if (width <= 480) return 100; // Très petit mobile
+      if (width <= 768) return 120; // Mobile
+      return 200; // Desktop (réduit de 240 à 200)
+    }
+
+    let radius = getRadius();
     const total = logos.length;
     const angleSpacing = (Math.PI * 2) / total;
 
@@ -153,6 +161,12 @@
       
       lastScrollY = currentScrollY;
     }, { passive: true });
+
+    // --- RESIZE LISTENER: Update radius on window resize ---
+    window.addEventListener('resize', () => {
+      radius = getRadius();
+      console.log(`[network-orbit] Radius updated to ${radius}px`);
+    });
 
     // --- REAL-TIME TICKER ---
     gsap.ticker.add(() => {
