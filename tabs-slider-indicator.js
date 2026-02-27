@@ -92,13 +92,18 @@
         const linkRect = linkElement.getBoundingClientRect();
         const menuRect = tabMenu.getBoundingClientRect();
         
-        // Get padding from .tabs-grid (1vh = ~10px on 1000px viewport)
+        // Get padding from .tabs-grid and from the tab itself
         const menuStyle = getComputedStyle(tabMenu);
-        const paddingLeft = parseFloat(menuStyle.paddingLeft) || 0;
-        const paddingTop = parseFloat(menuStyle.paddingTop) || 0;
+        const tabStyle = getComputedStyle(linkElement);
         
-        const left = (linkRect.left - menuRect.left) - paddingLeft;
-        const width = linkRect.width;
+        const menuPaddingLeft = parseFloat(menuStyle.paddingLeft) || 0;
+        const tabPaddingLeft = parseFloat(tabStyle.paddingLeft) || 0;
+        const tabPaddingRight = parseFloat(tabStyle.paddingRight) || 0;
+        
+        // Position: account for menu padding, then add tab padding to go inside
+        const left = (linkRect.left - menuRect.left) - menuPaddingLeft + tabPaddingLeft;
+        // Width: full tab width minus its horizontal padding
+        const width = linkRect.width - tabPaddingLeft - tabPaddingRight;
 
         console.log(`[tabs-slider-indicator] Update slider:`, {
           activeTab: activeTab.textContent.trim(),
