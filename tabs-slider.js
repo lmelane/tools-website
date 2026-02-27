@@ -167,6 +167,13 @@
     console.log('[tabs-slider] Tabs mapping:', Array.from(tabsMap.keys()));
     console.log('[tabs-slider] Sliders mapping:', Array.from(slidersMap.keys()));
 
+    // Force min-height on parent container to prevent collapse
+    const slidersContainer = document.querySelector('.sliders-div');
+    if (slidersContainer) {
+      gsap.set(slidersContainer, { minHeight: '400px' });
+      console.log('[tabs-slider] Parent container min-height set');
+    }
+
     // Clear Webflow inline styles first, then hide all sliders
     sliders.forEach(slider => {
       // Remove Webflow inline styles
