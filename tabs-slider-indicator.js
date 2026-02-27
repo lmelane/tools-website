@@ -75,23 +75,22 @@
 
       // Function to update slider position
       function updateSlider(activeTab, animate = true) {
-        // Get the first child (actual content) instead of the whole tab
-        const contentElement = activeTab.querySelector('[class*="w-inline-block"]') || 
-                              activeTab.querySelector('a') || 
-                              activeTab.firstElementChild || 
-                              activeTab;
+        // Target the link inside the tab (a.w-tab-link)
+        const linkElement = activeTab.querySelector('a.w-tab-link') || 
+                           activeTab.querySelector('a') || 
+                           activeTab;
         
-        const contentRect = contentElement.getBoundingClientRect();
+        const linkRect = linkElement.getBoundingClientRect();
         const menuRect = tabMenu.getBoundingClientRect();
         
-        const left = contentRect.left - menuRect.left;
-        const width = contentRect.width;
+        const left = linkRect.left - menuRect.left;
+        const width = linkRect.width;
 
         console.log(`[tabs-slider-indicator] Update slider:`, {
           activeTab: activeTab.textContent.trim(),
           left: left,
           width: width,
-          contentRect: contentRect,
+          linkRect: linkRect,
           menuRect: menuRect
         });
 
