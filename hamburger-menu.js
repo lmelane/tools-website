@@ -40,10 +40,10 @@
 
     let isOpen = false;
 
-    // Initial state: menu hidden off-screen to the right
+    // Initial state: menu hidden with display:none
     gsap.set(menu, {
-      x: '100%',
-      visibility: 'visible'
+      display: 'none',
+      x: '100%'
     });
 
     // Animation timelines
@@ -52,6 +52,8 @@
 
     // --- OPEN ANIMATION ---
     openTimeline
+      // Show menu first
+      .set(menu, { display: 'block' }, 0)
       // Slide menu in from right
       .to(menu, {
         x: '0%',
@@ -59,10 +61,11 @@
         ease: 'power3.out'
       }, 0)
       // Transform hamburger to cross
-      // Top line: rotate 45deg and move to center
+      // Top line: rotate 45deg and move down to center (7px = middle of 15px container)
       .to(topLine, {
-        y: 7, // Move to center (half of 15px height - 1px line = 7px)
+        y: '7px',
         rotation: 45,
+        transformOrigin: 'center center',
         duration: 0.4,
         ease: 'power2.inOut'
       }, 0)
@@ -72,10 +75,11 @@
         duration: 0.3,
         ease: 'power2.out'
       }, 0)
-      // Bottom line: rotate -45deg and move to center
+      // Bottom line: rotate -45deg and move up to center
       .to(bottomLine, {
-        y: -7, // Move to center
+        y: '-7px',
         rotation: -45,
+        transformOrigin: 'center center',
         duration: 0.4,
         ease: 'power2.inOut'
       }, 0);
@@ -90,7 +94,7 @@
       }, 0)
       // Transform cross back to hamburger
       .to(topLine, {
-        y: 0,
+        y: '0px',
         rotation: 0,
         duration: 0.4,
         ease: 'power2.inOut'
@@ -101,11 +105,13 @@
         ease: 'power2.in'
       }, 0.1)
       .to(bottomLine, {
-        y: 0,
+        y: '0px',
         rotation: 0,
         duration: 0.4,
         ease: 'power2.inOut'
-      }, 0);
+      }, 0)
+      // Hide menu after animation
+      .set(menu, { display: 'none' });
 
     // Click handler
     hamburger.addEventListener('click', () => {
@@ -114,12 +120,16 @@
         openTimeline.pause();
         closeTimeline.restart();
         isOpen = false;
+        // Unlock scroll
+        document.body.style.overflow = '';
         console.log('[hamburger-menu] Menu closed');
       } else {
         // Open menu
         closeTimeline.pause();
         openTimeline.restart();
         isOpen = true;
+        // Lock scroll
+        document.body.style.overflow = 'hidden';
         console.log('[hamburger-menu] Menu opened');
       }
     });
@@ -129,6 +139,8 @@
       if (isOpen && !menu.contains(e.target) && !hamburger.contains(e.target)) {
         closeTimeline.restart();
         isOpen = false;
+        // Unlock scroll
+        document.body.style.overflow = '';
         console.log('[hamburger-menu] Menu closed (click outside)');
       }
     });
