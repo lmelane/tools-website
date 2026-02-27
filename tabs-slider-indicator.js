@@ -48,17 +48,17 @@
 
       // Get padding from .tabs-grid
       const menuStyle = getComputedStyle(tabMenu);
-      const paddingTop = parseFloat(menuStyle.paddingTop) || 0;
-      const paddingBottom = parseFloat(menuStyle.paddingBottom) || 0;
+      const menuPaddingTop = parseFloat(menuStyle.paddingTop) || 0;
+      const menuPaddingBottom = parseFloat(menuStyle.paddingBottom) || 0;
       
       // Create slider background (respects padding)
       const slider = document.createElement('div');
       slider.className = 'tabs-slider-indicator';
       slider.style.cssText = `
         position: absolute;
-        top: ${paddingTop}px;
+        top: ${menuPaddingTop}px;
         left: 0;
-        height: calc(100% - ${paddingTop + paddingBottom}px);
+        height: calc(100% - ${menuPaddingTop + menuPaddingBottom}px);
         background-color: #2B2B2B;
         opacity: 0.5;
         transition: none;
@@ -98,13 +98,18 @@
         const tabStyle = getComputedStyle(linkElement);
         
         const menuPaddingLeft = parseFloat(menuStyle.paddingLeft) || 0;
+        const menuPaddingTop = parseFloat(menuStyle.paddingTop) || 0;
         const tabPaddingLeft = parseFloat(tabStyle.paddingLeft) || 0;
         const tabPaddingRight = parseFloat(tabStyle.paddingRight) || 0;
+        const tabPaddingTop = parseFloat(tabStyle.paddingTop) || 0;
+        const tabPaddingBottom = parseFloat(tabStyle.paddingBottom) || 0;
         
         // Position: account for menu padding, then add tab padding to go inside
         const left = (linkRect.left - menuRect.left) - menuPaddingLeft + tabPaddingLeft;
-        // Width: full tab width minus its horizontal padding
+        const top = (linkRect.top - menuRect.top) - menuPaddingTop + tabPaddingTop;
+        // Width/Height: full tab dimensions minus padding
         const width = linkRect.width - tabPaddingLeft - tabPaddingRight;
+        const height = linkRect.height - tabPaddingTop - tabPaddingBottom;
 
         console.log(`[tabs-slider-indicator] Update slider:`, {
           activeTab: activeTab.textContent.trim(),
@@ -117,14 +122,18 @@
         if (animate) {
           gsap.to(slider, {
             x: left,
+            y: top,
             width: width,
+            height: height,
             duration: 0.4,
             ease: 'power2.out'
           });
         } else {
           gsap.set(slider, {
             x: left,
-            width: width
+            y: top,
+            width: width,
+            height: height
           });
         }
       }
