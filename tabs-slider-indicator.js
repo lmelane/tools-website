@@ -75,10 +75,11 @@
 
       // Function to update slider position
       function updateSlider(activeTab, animate = true) {
-        // Target the link inside the tab (a.w-tab-link)
-        const linkElement = activeTab.querySelector('a.w-tab-link') || 
-                           activeTab.querySelector('a') || 
-                           activeTab;
+        // Check if activeTab itself is the link, or find link inside
+        const linkElement = activeTab.classList.contains('w-tab-link') ? activeTab :
+                           (activeTab.querySelector('a.w-tab-link') || 
+                            activeTab.querySelector('a') || 
+                            activeTab);
         
         const linkRect = linkElement.getBoundingClientRect();
         const menuRect = tabMenu.getBoundingClientRect();
