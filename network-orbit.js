@@ -48,12 +48,37 @@
 
     let angles = [];
     let speeds = [];
+    let baseSpeeds = []; // vitesses de base
     let lines = [];
+    let connectionLines = []; // lignes entre logos
+    let scrollMultiplier = 1.0; // multiplicateur de vitesse selon scroll
+    let hoveredIndex = -1; // index du logo survolé
 
     // --- INITIALIZATION: ANGLES AND SPEEDS ---
     logos.forEach((logo, i) => {
       angles[i] = i * angleSpacing;
-      speeds[i] = 0.0025 + (i * 0.0004); // slightly different speeds
+      baseSpeeds[i] = 0.0025 + (i * 0.0004); // vitesses de base
+      speeds[i] = baseSpeeds[i];
+
+      // --- HOVER INTERACTIONS ---
+      logo.addEventListener('mouseenter', () => {
+        hoveredIndex = i;
+        gsap.to(logo, {
+          scale: 1.3,
+          duration: 0.4,
+          ease: 'back.out(2)'
+        });
+        console.log(`[network-orbit] Logo ${i + 1} hovered`);
+      });
+
+      logo.addEventListener('mouseleave', () => {
+        hoveredIndex = -1;
+        gsap.to(logo, {
+          scale: 1,
+          duration: 0.3,
+          ease: 'power2.out'
+        });
+      });
 
       // Create lines
       const baseLine = document.createElementNS(svgNS, "line");
@@ -93,6 +118,42 @@
       console.log(`[network-orbit] Logo ${i + 1}: angle=${angles[i].toFixed(2)}, speed=${speeds[i].toFixed(4)}`);
     });
 
+    // --- CONNEXIONS ENTRE LOGOS ---
+    for (let i = 0; i < total; i++) {
+      for (let j = i + 1; j < total; j++) {
+        const connectionLine = document.createElementNS(svgNS, "line");
+        connectionLine.setAttribute("stroke", "rgba(255,255,255,0.05)");
+        connectionLine.setAttribute("stroke-width", "1");
+        connectionLine.setAttribute("opacity", "0");
+        svg.appendChild(connectionLine);
+        connectionLines.push({ from: i, to: j, line: connectionLine });
+      }
+    }
+
+    console.log(`[network-orbit] Created ${connectionLines.length} connection lines`);
+
+    // --- SCROLL REACTIVITY ---
+    let lastScrollY = window.scrollY;
+    window.addEventListener('scroll', () => {
+      const currentScrollY = window.scrollY;
+      const scrollDelta = Math.abs(currentScrollY - lastScrollY);
+      
+      // Augmenter la vitesse pendant le scroll
+      scrollMultiplier = 1.0 + Math.min(scrollDelta * 0.01, 2.0);
+      
+      // Retour progressif à la vitesse normale
+      gsap.to({ value: scrollMultiplier }, {
+        value: 1.0,
+        duration: 1.5,
+        ease: 'power2.out',
+        onUpdate: function() {
+          scrollMultiplier = this.targets()[0].value;
+        }
+      });
+      
+      lastScrollY = currentScrollY;
+    }, { passive: true });
+
     // --- REAL-TIME TICKER ---
     gsap.ticker.add(() => {
       const wrapperRect = wrapper.getBoundingClientRect();
@@ -102,6 +163,17 @@
       const centerY = centerRect.top - wrapperRect.top + centerRect.height / 2;
 
       logos.forEach((logo, i) => {
+        // --- VARIATIONS DE VITESSE INTELLIGENTES ---
+        // Effet de gravité : plus lent en haut, plus rapide en bas
+        const normalizedY = Math.sin(angles[i]); // -1 (haut) à 1 (bas)
+        const gravityFactor = 1.0 + (normalizedY * 0.3); // 0.7 à 1.3
+        
+        // Ralentissement au hover
+        const hoverFactor = (hoveredIndex === i) ? 0.3 : 1.0;
+        
+        // Vitesse finale combinée
+        speeds[i] = baseSpeeds[i] * gravityFactor * hoverFactor * scrollMultiplier;
+        
         // independent angular evolution
         angles[i] += speeds[i];
 
@@ -133,6 +205,37 @@
         );
 
         pulseLine.setAttribute("stroke-dasharray", `10 ${length}`);
+      });
+
+      // --- CONNEXIONS ENTRE LOGOS PROCHES ---
+      connectionLines.forEach(({ from, to, line }) => {
+        const fromLogo = logos[from];
+        const toLogo = logos[to];
+        
+        const fromRect = fromLogo.getBoundingClientRect();
+        const toRect = toLogo.getBoundingClientRect();
+        
+        const fromX = fromRect.left - wrapperRect.left + fromRect.width / 2;
+        const fromY = fromRect.top - wrapperRect.top + fromRect.height / 2;
+        const toX = toRect.left - wrapperRect.left + toRect.width / 2;
+        const toY = toRect.top - wrapperRect.top + toRect.height / 2;
+        
+        const distance = Math.sqrt(
+          Math.pow(toX - fromX, 2) + Math.pow(toY - fromY, 2)
+        );
+        
+        // Afficher la ligne si distance < 200px
+        const maxDistance = 200;
+        if (distance < maxDistance) {
+          const opacity = 1 - (distance / maxDistance);
+          line.setAttribute("x1", fromX);
+          line.setAttribute("y1", fromY);
+          line.setAttribute("x2", toX);
+          line.setAttribute("y2", toY);
+          line.setAttribute("opacity", opacity * 0.3);
+        } else {
+          line.setAttribute("opacity", "0");
+        }
       });
     });
 
