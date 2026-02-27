@@ -61,7 +61,11 @@
         ease: 'power3.out'
       }, 0)
       // Transform hamburger to cross
-      // Top line: rotate 45deg and move down to center (7px = middle of 15px container)
+      // Container: 25px width x 15px height, flex column space-between
+      // Lines positions: top=0px, middle=7px, bottom=14px
+      // To form cross: both top and bottom must move to middle (7px)
+      
+      // Top line: move down 7px and rotate 45deg
       .to(topLine, {
         y: '7px',
         rotation: 45,
@@ -75,7 +79,7 @@
         duration: 0.3,
         ease: 'power2.out'
       }, 0)
-      // Bottom line: rotate -45deg and move up to center
+      // Bottom line: move up 7px and rotate -45deg
       .to(bottomLine, {
         y: '-7px',
         rotation: -45,
