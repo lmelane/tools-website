@@ -43,18 +43,19 @@
         return;
       }
 
-      // Create slider indicator
+      // Create slider background (full height overlay)
       const slider = document.createElement('div');
       slider.className = 'tabs-slider-indicator';
       slider.style.cssText = `
         position: absolute;
-        bottom: 0;
+        top: 0;
         left: 0;
-        height: 2px;
+        height: 100%;
         background-color: #161616;
         transition: none;
         pointer-events: none;
-        z-index: 10;
+        z-index: 1;
+        border-radius: inherit;
       `;
 
       // Make sure parent is positioned
@@ -63,6 +64,14 @@
       }
 
       tabMenu.appendChild(slider);
+
+      // Ensure tab text stays above the slider
+      tabs.forEach(tab => {
+        if (getComputedStyle(tab).position === 'static') {
+          tab.style.position = 'relative';
+        }
+        tab.style.zIndex = '2';
+      });
 
       // Function to update slider position
       function updateSlider(activeTab, animate = true) {
