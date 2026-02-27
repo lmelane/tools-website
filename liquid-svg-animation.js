@@ -311,7 +311,143 @@
       console.log('[liquid-svg] Rotation & scale breathing initialized');
     }
 
-    console.log('[liquid-svg] ✅ Ultra complex animation fully initialized');
+    // ============================================================
+    // 7. ORGANIC PARTICLES ANIMATION
+    // ============================================================
+
+    const particles = svg.querySelectorAll('.organic-particles ellipse');
+    if (particles.length > 0) {
+      particles.forEach((particle, index) => {
+        // Position flottante
+        gsap.to(particle, {
+          attr: {
+            cx: `+=${gsap.utils.random(-100, 100)}`,
+            cy: `+=${gsap.utils.random(-80, 80)}`
+          },
+          duration: gsap.utils.random(8, 15),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: index * 0.5
+        });
+
+        // Morphing de taille
+        gsap.to(particle, {
+          attr: {
+            rx: `+=${gsap.utils.random(-20, 20)}`,
+            ry: `+=${gsap.utils.random(-25, 25)}`
+          },
+          duration: gsap.utils.random(6, 10),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: index * 0.3
+        });
+
+        // Pulsation d'opacité
+        gsap.to(particle, {
+          opacity: gsap.utils.random(0.3, 0.7),
+          duration: gsap.utils.random(4, 7),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: index * 0.2
+        });
+      });
+
+      console.log(`[liquid-svg] ${particles.length} organic particles animated`);
+    }
+
+    // ============================================================
+    // 8. ORGANIC CHUNKS ANIMATION
+    // ============================================================
+
+    const chunks = svg.querySelectorAll('.organic-chunks path');
+    if (chunks.length > 0) {
+      chunks.forEach((chunk, index) => {
+        // Rotation lente
+        gsap.to(chunk, {
+          rotation: gsap.utils.random(-15, 15),
+          transformOrigin: 'center center',
+          duration: gsap.utils.random(12, 20),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: index * 0.8
+        });
+
+        // Scale breathing
+        gsap.to(chunk, {
+          scale: gsap.utils.random(0.9, 1.15),
+          transformOrigin: 'center center',
+          duration: gsap.utils.random(8, 14),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: index * 0.6
+        });
+
+        // Opacité variable
+        gsap.to(chunk, {
+          opacity: gsap.utils.random(0.25, 0.55),
+          duration: gsap.utils.random(5, 9),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: index * 0.4
+        });
+      });
+
+      console.log(`[liquid-svg] ${chunks.length} organic chunks animated`);
+    }
+
+    // ============================================================
+    // 9. FLOATING PARTICLES ANIMATION
+    // ============================================================
+
+    const floatingParticles = svg.querySelectorAll('.floating-particles circle');
+    if (floatingParticles.length > 0) {
+      floatingParticles.forEach((particle, index) => {
+        // Mouvement brownien (aléatoire)
+        gsap.to(particle, {
+          attr: {
+            cx: `+=${gsap.utils.random(-150, 150)}`,
+            cy: `+=${gsap.utils.random(-120, 120)}`
+          },
+          duration: gsap.utils.random(10, 18),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: index * 0.3
+        });
+
+        // Taille pulsante
+        gsap.to(particle, {
+          attr: {
+            r: `+=${gsap.utils.random(-3, 5)}`
+          },
+          duration: gsap.utils.random(3, 6),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: index * 0.2
+        });
+
+        // Opacité scintillante
+        gsap.to(particle, {
+          opacity: gsap.utils.random(0.3, 0.9),
+          duration: gsap.utils.random(2, 5),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: index * 0.15
+        });
+      });
+
+      console.log(`[liquid-svg] ${floatingParticles.length} floating particles animated`);
+    }
+
+    console.log('[liquid-svg] ✅ Ultra complex granular animation fully initialized');
   }
 
   // ============================================================
