@@ -138,10 +138,14 @@
         }
       }
 
-      // Find initial active tab (ARIA or Webflow class)
-      let initialActive = tabMenu.querySelector('[aria-selected="true"]') || 
-                          tabMenu.querySelector('.w--current') ||
-                          tabs[0];
+      // Find initial active tab - force first tab (div-tabs-1) if none active
+      let initialActive = tabs[0]; // Always use first tab (div-tabs-1)
+      
+      // Activate first tab if not already active
+      if (!initialActive.classList.contains('w--current')) {
+        // Click the first tab to activate it
+        initialActive.click();
+      }
       
       console.log(`[tabs-slider-indicator] Menu ${menuIndex + 1}: Initial active tab:`, initialActive);
       updateSlider(initialActive, false);
