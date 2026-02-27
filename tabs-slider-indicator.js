@@ -72,6 +72,14 @@
         const left = tabRect.left - menuRect.left;
         const width = tabRect.width;
 
+        console.log(`[tabs-slider-indicator] Update slider:`, {
+          activeTab: activeTab.textContent.trim(),
+          left: left,
+          width: width,
+          tabRect: tabRect,
+          menuRect: menuRect
+        });
+
         if (animate) {
           gsap.to(slider, {
             x: left,
