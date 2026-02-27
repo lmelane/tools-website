@@ -2,7 +2,8 @@
   // ============================================================
   // TEXT ANIMATION V2 - Ultra Robust Webflow Compatible
   // Best practices: performance, accessibility, mobile/desktop/tablet
-  // Attribute: data-text-animate="variant" (flip3d, fade, slide, wave)
+  // Auto-detects: h1, h2, h3, h4, h5, h6 (automatic animation)
+  // Optional: data-text-animate="variant" (flip3d, fade, slide, wave)
   // Requires: GSAP (https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js)
   // ============================================================
 
@@ -19,7 +20,7 @@
   if (prefersReducedMotion) {
     console.log('[text-animation-v2] Reduced motion detected - animations disabled');
     // Show all text immediately without animation
-    document.querySelectorAll('[data-text-animate]').forEach(el => {
+    document.querySelectorAll('h1, h2, h3, h4, h5, h6, [data-text-animate]').forEach(el => {
       el.style.opacity = '1';
     });
     return;
@@ -164,10 +165,11 @@
 
   // Initialize all elements
   function initAll() {
-    const elements = document.querySelectorAll('[data-text-animate]');
+    // Auto-detect headings (h1, h2, h3, h4, h5, h6) OR elements with data-text-animate
+    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, [data-text-animate]');
     
     if (elements.length === 0) {
-      console.log('[text-animation-v2] No elements found with data-text-animate');
+      console.log('[text-animation-v2] No elements found');
       return;
     }
     
