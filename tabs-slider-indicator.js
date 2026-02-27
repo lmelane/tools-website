@@ -114,6 +114,8 @@
       let initialActive = tabMenu.querySelector('[aria-selected="true"]') || 
                           tabMenu.querySelector('.w--current') ||
                           tabs[0];
+      
+      console.log(`[tabs-slider-indicator] Menu ${menuIndex + 1}: Initial active tab:`, initialActive);
       updateSlider(initialActive, false);
 
       console.log(`[tabs-slider-indicator] Menu ${menuIndex + 1}: Slider initialized on tab "${initialActive.textContent.trim()}"`);
@@ -126,9 +128,15 @@
           // Small delay to let Webflow update classes
           setTimeout(() => {
             const activeTab = tabMenu.querySelector('[aria-selected="true"]') || 
-                             tabMenu.querySelector('.w--current');
+                             tabMenu.querySelector('.w--current') ||
+                             tab; // Fallback to clicked tab
+            
+            console.log(`[tabs-slider-indicator] Active tab after click:`, activeTab);
+            
             if (activeTab) {
               updateSlider(activeTab, true);
+            } else {
+              console.warn(`[tabs-slider-indicator] No active tab found after click`);
             }
           }, 50);
         });
