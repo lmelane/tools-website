@@ -46,14 +46,19 @@
       
       console.log(`[tabs-slider-indicator] Menu ${menuIndex + 1}: Found ${tabs.length} tabs`);
 
-      // Create slider background (full height overlay)
+      // Get padding from .tabs-grid
+      const menuStyle = getComputedStyle(tabMenu);
+      const paddingTop = parseFloat(menuStyle.paddingTop) || 0;
+      const paddingBottom = parseFloat(menuStyle.paddingBottom) || 0;
+      
+      // Create slider background (respects padding)
       const slider = document.createElement('div');
       slider.className = 'tabs-slider-indicator';
       slider.style.cssText = `
         position: absolute;
-        top: 0;
+        top: ${paddingTop}px;
         left: 0;
-        height: 100%;
+        height: calc(100% - ${paddingTop + paddingBottom}px);
         background-color: #161616;
         transition: none;
         pointer-events: none;
@@ -87,7 +92,12 @@
         const linkRect = linkElement.getBoundingClientRect();
         const menuRect = tabMenu.getBoundingClientRect();
         
-        const left = linkRect.left - menuRect.left;
+        // Get padding from .tabs-grid (1vh = ~10px on 1000px viewport)
+        const menuStyle = getComputedStyle(tabMenu);
+        const paddingLeft = parseFloat(menuStyle.paddingLeft) || 0;
+        const paddingTop = parseFloat(menuStyle.paddingTop) || 0;
+        
+        const left = (linkRect.left - menuRect.left) - paddingLeft;
         const width = linkRect.width;
 
         console.log(`[tabs-slider-indicator] Update slider:`, {
