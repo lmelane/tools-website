@@ -13,6 +13,9 @@
 
   console.log('[hamburger-menu-simple] Initializing...');
 
+  // Check for reduced motion preference (accessibility)
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   function initHamburgerMenu() {
     const hamburger = document.querySelector('.hamburger_menu_mobile');
     const menu = document.querySelector('.bigmenumobile');
@@ -44,7 +47,10 @@
       x: '100%'
     });
 
-    // Animation timelines
+    // Animation timelines (instant if reduced motion)
+    const duration = prefersReducedMotion ? 0 : 0.4;
+    const menuDuration = prefersReducedMotion ? 0 : 0.6;
+    
     const openTimeline = gsap.timeline({ paused: true });
     const closeTimeline = gsap.timeline({ paused: true });
 
@@ -55,19 +61,19 @@
       // Slide menu in from right
       .to(menu, {
         x: '0%',
-        duration: 0.6,
+        duration: menuDuration,
         ease: 'power3.out'
       }, 0)
       // Rotate hamburger 90deg and fade middle line
       .to(hamburger, {
         rotation: 90,
-        duration: 0.4,
+        duration: duration,
         ease: 'power2.inOut'
       }, 0)
       .to(downLine, {
         opacity: 0,
         scaleX: 0,
-        duration: 0.3,
+        duration: duration * 0.75,
         ease: 'power2.out'
       }, 0);
 
@@ -76,19 +82,19 @@
       // Slide menu out to right
       .to(menu, {
         x: '100%',
-        duration: 0.5,
+        duration: menuDuration * 0.83,
         ease: 'power3.in'
       }, 0)
       // Rotate hamburger back to 0deg
       .to(hamburger, {
         rotation: 0,
-        duration: 0.4,
+        duration: duration,
         ease: 'power2.inOut'
       }, 0)
       .to(downLine, {
         opacity: 1,
         scaleX: 1,
-        duration: 0.3,
+        duration: duration * 0.75,
         ease: 'power2.in'
       }, 0.1)
       // Hide menu after animation
@@ -116,7 +122,7 @@
     });
 
     // Optional: close menu when clicking outside
-    document.addEventListener('click', (e) => {
+    const outsideClickHandler = (e) => {
       if (isOpen && !menu.contains(e.target) && !hamburger.contains(e.target)) {
         closeTimeline.restart();
         isOpen = false;
@@ -124,6 +130,13 @@
         document.body.style.overflow = '';
         console.log('[hamburger-menu-simple] Menu closed (click outside)');
       }
+    };
+    
+    document.addEventListener('click', outsideClickHandler);
+
+    // Cleanup function
+    window.addEventListener('beforeunload', () => {
+      document.removeEventListener('click', outsideClickHandler);
     });
 
     console.log('[hamburger-menu-simple] ✅ Hamburger menu initialized');
