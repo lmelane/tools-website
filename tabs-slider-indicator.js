@@ -34,7 +34,8 @@
       let tabs = tabMenu.querySelectorAll('[role="tab"]');
       
       if (tabs.length === 0) {
-        tabs = tabMenu.querySelectorAll('[class*="div-tabs-"]');
+        // Select only elements that have BOTH div-tabs-* AND w-tab-link
+        tabs = tabMenu.querySelectorAll('[class*="div-tabs-"][class*="w-tab-link"]');
         console.log(`[tabs-slider-indicator] Menu ${menuIndex + 1}: Using Webflow tab classes`);
       }
       
@@ -42,6 +43,8 @@
         console.warn(`[tabs-slider-indicator] Menu ${menuIndex + 1}: No tabs found`);
         return;
       }
+      
+      console.log(`[tabs-slider-indicator] Menu ${menuIndex + 1}: Found ${tabs.length} tabs`);
 
       // Create slider background (full height overlay)
       const slider = document.createElement('div');
