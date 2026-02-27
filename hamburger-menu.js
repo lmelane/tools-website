@@ -46,6 +46,11 @@
       x: '100%'
     });
 
+    // Set transform origin for lines (important for rotation)
+    gsap.set([topLine, downLine, bottomLine], {
+      transformOrigin: '50% 50%'
+    });
+
     // Animation timelines
     const openTimeline = gsap.timeline({ paused: true });
     const closeTimeline = gsap.timeline({ paused: true });
@@ -67,9 +72,8 @@
       
       // Top line: move down 7px and rotate 45deg
       .to(topLine, {
-        y: '7px',
+        translateY: 7,
         rotation: 45,
-        transformOrigin: 'center center',
         duration: 0.4,
         ease: 'power2.inOut'
       }, 0)
@@ -81,9 +85,8 @@
       }, 0)
       // Bottom line: move up 7px and rotate -45deg
       .to(bottomLine, {
-        y: '-7px',
+        translateY: -7,
         rotation: -45,
-        transformOrigin: 'center center',
         duration: 0.4,
         ease: 'power2.inOut'
       }, 0);
@@ -98,7 +101,7 @@
       }, 0)
       // Transform cross back to hamburger
       .to(topLine, {
-        y: '0px',
+        translateY: 0,
         rotation: 0,
         duration: 0.4,
         ease: 'power2.inOut'
@@ -109,7 +112,7 @@
         ease: 'power2.in'
       }, 0.1)
       .to(bottomLine, {
-        y: '0px',
+        translateY: 0,
         rotation: 0,
         duration: 0.4,
         ease: 'power2.inOut'
