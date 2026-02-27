@@ -1,27 +1,16 @@
 (() => {
   // ============================================================
-  // OPTIMIZED GPU Fluid V2 - Adaptive Performance + Lazy Load
+  // OPTIMIZED GPU Fluid - Adaptive Performance
   // Auto-detects device capability and adjusts quality
-  // Lazy loads only when visible (Intersection Observer)
   // ============================================================
 
   const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if (isMobile) {
-    console.log('[liquid-optimized] Disabled on mobile for performance');
-    return;
-  }
+  if (isMobile) return;
 
   const canvas = document.getElementById("liquid-canvas-global");
   if (!canvas) return;
 
-  // Lazy init with Intersection Observer
-  let isInitialized = false;
-
-  function initLiquid() {
-    if (isInitialized) return;
-    isInitialized = true;
-
-    canvas.style.display = "block";
+  canvas.style.display = "block";
 
   const gl = canvas.getContext("webgl2", {
     alpha: true,
@@ -670,17 +659,4 @@
   }
 
   requestAnimationFrame(frame);
-  }
-
-  // Intersection Observer for lazy loading
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        initLiquid();
-        observer.disconnect();
-      }
-    });
-  }, { threshold: 0.1 });
-
-  observer.observe(canvas);
 })();
