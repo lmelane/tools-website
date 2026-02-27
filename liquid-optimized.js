@@ -2,10 +2,14 @@
   // ============================================================
   // OPTIMIZED GPU Fluid - Adaptive Performance
   // Auto-detects device capability and adjusts quality
+  // Desktop only (>1024px) for performance
   // ============================================================
 
-  const isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if (isMobile) return;
+  const isDesktop = window.innerWidth > 1024;
+  if (!isDesktop) {
+    console.log('[liquid-optimized] Disabled on mobile/tablet for performance');
+    return;
+  }
 
   const canvas = document.getElementById("liquid-canvas-global");
   if (!canvas) return;
